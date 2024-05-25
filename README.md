@@ -1,4 +1,4 @@
-# Concordance Machine
+# TBQ Concordance Machine
 
 ## Purpose
 The goal of this project is to automate the creation of a concordance flashcards for AG Teen Bible Quiz competitions. 
