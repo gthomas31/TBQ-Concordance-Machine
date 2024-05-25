@@ -17,6 +17,7 @@ class ConcordanceMachine:
         self.verses: Mapping[Tuple[str, int]: List[Verse]] = {}
 
         self.concordance: Mapping[str: Tuple[int, List[Tuple[str, int]]]] = {}
+        self.phrase_concordance: Mapping[str: Tuple[int, List[Tuple[str, int]]]] = {}
 
     def get_html_files(self):
         for book in self.books:
@@ -68,17 +69,6 @@ class ConcordanceMachine:
                 verse_texts = [verse_export.text.strip().replace(verse_number, '', 1).strip()]
             verse_text = " ".join(verse_texts)
             print(verse_text)
-            # try:
-            #     verse_text = verse_export.find('p', class_='body-ch-hd').text.strip().replace(verse_number, '', 1).strip()
-            # except AttributeError:
-            #     try:
-            #         verse_text = verse_export.find('p', class_='body-hd').text.strip().replace(verse_number, '', 1).strip()
-            #     except AttributeError:
-            #         try:
-            #             verse_text = verse_export.find('p', class_='body').text.strip().replace(verse_number, '', 1).strip()
-            #         except AttributeError:
-            #             verse_text = verse_export.text.strip().replace(verse_number, '', 1).strip()
-            # print(verse_text)
 
             try:
                 section_title = verse_export.find('h3', class_='subhead').text.strip()
@@ -108,9 +98,16 @@ class ConcordanceMachine:
             # Iterate through each Verse object
             for verse in verses:
                 # Tokenize the text of the verse into words
-                words = re.findall(r'\b\w+\b',
+                words = re.findall(r"\b[\w'’]+\b",
                                    verse.text.upper())  # Using regex to split by word boundaries and convert to uppercase
                 # unique_words = set(words)  # Get unique words in the verse
+
+                phrases = []
+                # Generate all possible phrases
+                for start in range(len(words)):
+                    for end in range(start + 2, len(words) + 1):
+                        phrase = " ".join(words[start:end]).strip()
+                        phrases.append(phrase)
 
                 # Increment the count of verses each word appears in
                 for word in words:
@@ -122,12 +119,24 @@ class ConcordanceMachine:
                     except KeyError:
                         self.concordance[word] = (1, [(book, chapter, verse.verse)])
 
+                for phrase in phrases:
+                    try:
+                        count, references = self.phrase_concordance[phrase]
+                        count += 1
+                        references.append((book, chapter, verse.verse))
+                        self.phrase_concordance[phrase] = [count, references]
+                    except KeyError:
+                        self.phrase_concordance[phrase] = (1, [(book, chapter, verse.verse)])
 
-    def print_concordance(self):
+    def print_concordance(self, type="word"):
+        concordance = self.concordance
+        if type == "phrase":
+            concordance = self.phrase_concordance
         words = []
-        for word in self.concordance:
-            words.append((self.concordance[word][0], word))
+        for word in concordance:
+            words.append((concordance[word][0], word))
 
         words.sort()
         for count, word in words:
-            print(f"{word}: {count}")
+            if count != 1:
+                print(f"{word}: {count}")

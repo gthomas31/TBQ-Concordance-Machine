@@ -13,4 +13,5 @@ cm.generate_concordance()
 
 print(cm.concordance)
 
-cm.print_concordance()
+cm.print_concordance(type="phrase")
+# cm.print_concordance()
