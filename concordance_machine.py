@@ -4,6 +4,7 @@ from typing import Mapping, List, Tuple
 from bs4 import BeautifulSoup
 import re
 from verse import Verse
+from datetime import datetime
 
 
 class ConcordanceMachine:
@@ -54,7 +55,10 @@ class ConcordanceMachine:
             for tag in verse_export.find_all(['a', 'span'], class_=['a-tn', 'tn', 'tn-ref']):
                 tag.decompose()
             # Extract verse number and text
-            verse_number = verse_export.find('span', class_='vn').text.strip()
+            try:
+                verse_number = verse_export.find('span', class_='vn').text.strip()
+            except AttributeError:
+                continue
             print(verse_number)
             # verse_text = verse_export.text.strip().replace(verse_number, '', 1).strip()
             # Find the section title associated with this verse
@@ -68,6 +72,7 @@ class ConcordanceMachine:
             if not verse_texts:
                 verse_texts = [verse_export.text.strip().replace(verse_number, '', 1).strip()]
             verse_text = " ".join(verse_texts)
+            verse_text = verse_text.replace("’", "'")
             print(verse_text)
 
             try:
@@ -128,9 +133,9 @@ class ConcordanceMachine:
                     except KeyError:
                         self.phrase_concordance[phrase] = (1, [(book, chapter, verse.verse)])
 
-    def print_concordance(self, type="word"):
+    def print_concordance(self, concordance_type="word"):
         concordance = self.concordance
-        if type == "phrase":
+        if concordance_type == "phrase":
             concordance = self.phrase_concordance
         words = []
         for word in concordance:
@@ -140,3 +145,42 @@ class ConcordanceMachine:
         for count, word in words:
             if count != 1:
                 print(f"{word}: {count}")
+
+    def export_concordance(self, export_directory="exports", concordance_type="word", export_format="quizlet", count=2):
+        concordance = self.concordance
+        if concordance_type == "phrase":
+            concordance = self.phrase_concordance
+
+        words = []
+        for word in concordance:
+            word_count = concordance[word][0]
+            if word_count == count:
+                references = concordance[word][1]
+                words.append((word, references))
+        words.sort()
+
+        book_string = "_".join(self.books).lower()
+        run_date = datetime.today().strftime("%m-%d-%Y")
+        file_type = "txt" if export_format == "quizlet" else "docx"
+        print(book_string, run_date)
+
+        # Define the file name and the lines to write
+        file_name = f"{book_string}_{count}x_{concordance_type}_concordance_{export_format}_export_{run_date}.{file_type}"
+        file_path = os.path.join(export_directory, file_name)
+
+        # Create the directory if it doesn't exist
+        if not os.path.exists(export_directory):
+            os.makedirs(export_directory)
+
+        print(f"Writing to {file_path} for {export_format} export...")
+        if export_format == "quizlet":
+            with open(file_path, "w+") as file:
+                for word, references in words:
+                    file.write(f"{word.title()},")
+                    for reference in references:
+                        book, chapter, verse = reference
+                        file.write(f"{book} {chapter}:{verse}\n")
+                    file.write("\n")
+
+        print(f"Finished writing to {file_path}")
+
