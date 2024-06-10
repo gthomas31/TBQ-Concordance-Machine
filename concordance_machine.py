@@ -103,7 +103,7 @@ class ConcordanceMachine:
             # Iterate through each Verse object
             for verse in verses:
                 # Tokenize the text of the verse into words
-                words = re.findall(r"\b[\w'’]+\b",
+                words = re.findall(r"\b[\w'’-]+\b",
                                    verse.text.upper())  # Using regex to split by word boundaries and convert to uppercase
                 # unique_words = set(words)  # Get unique words in the verse
 
@@ -176,7 +176,21 @@ class ConcordanceMachine:
         if export_format == "quizlet":
             with open(file_path, "w+") as file:
                 for word, references in words:
-                    file.write(f"{word.title()},")
+                    all_words = word.split(" ")
+                    # Lowercase letters after the apostrophe
+                    for i in range(0, len(all_words)):
+                        formatted_word = all_words[i].title()
+                        if "'" in formatted_word:
+                            split_word = formatted_word.split("'")
+                            formatted_word = split_word[0] + "'" + split_word[1].lower(
+                            )
+                        # Lowercase letters after the hyphen
+                        if "-" in formatted_word:
+                            split_word = formatted_word.split("-")
+                            formatted_word = split_word[0] + "-" + split_word[1].lower()
+                        all_words[i] = formatted_word
+                    formatted_string = " ".join(all_words)
+                    file.write(f"{formatted_string},")
                     for reference in references:
                         book, chapter, verse = reference
                         file.write(f"{book} {chapter}:{verse}\n")

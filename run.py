@@ -17,4 +17,4 @@ print(cm.concordance)
 
 # Add user input for generating export files
 
-cm.export_concordance(concordance_type="phrase")
+cm.export_concordance(concordance_type="word", count=3)
