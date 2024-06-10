@@ -150,6 +150,22 @@ class ConcordanceMachine:
         concordance = self.concordance
         if concordance_type == "phrase":
             concordance = self.phrase_concordance
+            phrases = list(concordance.keys())
+            for phrase in phrases:
+                if concordance[phrase][0] != count:
+                    concordance.pop(phrase)
+            phrases = list(concordance.keys())
+            for i in range(len(phrases)):
+                for j in range(len(phrases)):
+                    try:
+                        if i != j and phrases[i] in phrases[j]:
+                            if concordance[phrases[i]][1] == concordance[phrases[j]][1]:
+                                print(concordance[phrases[i]][1])
+                                print(concordance[phrases[j]][1])
+                                concordance.pop(phrases[i])
+                                print(f"Removing: {phrases[i]}")
+                    except KeyError:
+                        continue
 
         words = []
         for word in concordance:
