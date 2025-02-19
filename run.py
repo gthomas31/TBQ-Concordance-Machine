@@ -2,7 +2,7 @@ from concordance_machine import ConcordanceMachine
 
 # TODO: Add config file with run parameters
 
-cm = ConcordanceMachine(books=['Romans', 'James'])
+cm = ConcordanceMachine(books=['Acts'])
 
 cm.get_html_files()
 print(cm.html_files)
@@ -17,4 +17,4 @@ print(cm.concordance)
 
 # Add user input for generating export files
 
-cm.export_concordance(concordance_type="phrase", count=3)
+cm.export_concordance(concordance_type="word", count=3)

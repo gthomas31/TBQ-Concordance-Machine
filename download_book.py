@@ -6,8 +6,8 @@ import os
 dotenv.load_dotenv(".env")
 API_KEY = os.getenv("NLT_API_KEY")
 
-book = "James"
-chapters = 5
+book = "Acts"
+chapters = 17
 
 for chapter in range(1, chapters + 1):
     # Define the directory and file paths
