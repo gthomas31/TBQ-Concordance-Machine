@@ -103,8 +103,7 @@ class ConcordanceMachine:
             # Iterate through each Verse object
             for verse in verses:
                 # Tokenize the text of the verse into words
-                words = re.findall(r"\b[\w'’-]+\b",
-                                   verse.text.upper())  # Using regex to split by word boundaries and convert to uppercase
+                words = re.findall(r"\b[\w'’-]+(?:,\d+)?\b", verse.text.upper())  # Using regex to split by word boundaries and convert to uppercase
                 # unique_words = set(words)  # Get unique words in the verse
 
                 phrases = []
